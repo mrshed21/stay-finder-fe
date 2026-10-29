@@ -19,6 +19,24 @@ export async function login(email: string, password: string) {
   return false;
 }
 
+export async function register(email: string, password: string) {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/register/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ email, password }),
+  });
+  return response.ok;
+}
+
+export async function logout() {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/logout/`, {
+    method: "POST",
+    credentials: "include",
+  });
+  return response.ok;
+}
+
 
 export async function getMe(): Promise<AuthUser | null> {
   const url = new URL(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/me/`);
