@@ -1,19 +1,23 @@
 "use client";
 
-import { getMe, login } from "@/utils/authService";
+import { getMe, login, logout } from "@/utils/authService";
 import { createContext, useState, useEffect, useContext } from "react";
 import type { PropsWithChildren } from "react";
 
 type AuthContextState = {
   user: AuthUser | null;
-  isPending?: boolean
-  login: (email: string, password: string) => Promise<void | string>
+  isPending: boolean;
+  login: (email: string, password: string) => Promise<void | string>;
+  logout: () => Promise<void | string>;
+  refreshUser: () => Promise<AuthUser | null>;
 };
 
 const defaultState: AuthContextState = {
   user: null,
   isPending: true,
-  login: () => Promise.resolve()
+  login: () => Promise.resolve(),
+  logout: () => Promise.resolve(),
+  refreshUser: () => Promise.resolve(null),
 };
 
 const AuthContext = createContext<AuthContextState>(defaultState);
@@ -26,31 +30,37 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
     try {
         const authenticated = await login(email, password)
         if(!authenticated) {
-            throw "Invalid credentials"
+            return "Invalid credentials"
         }
-        await _getMe()
+        const currentUser = await _getMe()
+        if (!currentUser) return "Could not load your account"
         return
 
-    } catch (e) {
-        console.warn("error in logging in",  e)
-        return "invalid Credentials"
+    } catch {
+        return "Could not log in"
     }
   }
 
-  const _getMe = async () => {
+  const _getMe = async (): Promise<AuthUser | null> => {
     setIsPending(true)
     try {
-      
-        const user = await getMe()
-        if(!user) {
-            throw "User not found"
-        }
-        console.log("user", user)
-        setUser(user)
-    } catch (e) {
-        console.warn("error in getting me", e)
+        const currentUser = await getMe()
+        setUser(currentUser)
+        return currentUser
+    } catch {
+        setUser(null)
+        return null
     } finally {
       setIsPending(false)
+    }
+  }
+
+  const _logout: typeof defaultState.logout = async () => {
+    try {
+      if (!await logout()) return "Could not log out"
+      setUser(null)
+    } catch {
+      return "Could not log out"
     }
   }
 
@@ -63,7 +73,9 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
       value={{
         user,
         isPending,
-        login: _login
+        login: _login,
+        logout: _logout,
+        refreshUser: _getMe
       }}
     >
       {children}
