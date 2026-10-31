@@ -56,6 +56,16 @@ export default function PropertyBookerCard({ property }: PropertyBookerCardProps
       )
     : 0;
   const estimatedTotal = nights > 0 ? nights * Number(property.price_per_night) : 0;
+  const editDatesChanged = Boolean(
+    editingBooking && editDates &&
+    (editDates.check_in !== editingBooking.check_in || editDates.check_out !== editingBooking.check_out),
+  );
+  const editNights = editDates
+    ? differenceInCalendarDays(parseISO(editDates.check_out), parseISO(editDates.check_in))
+    : 0;
+  const editEstimatedTotal = editNights > 0
+    ? editNights * Number(property.price_per_night)
+    : 0;
 
   useEffect(() => {
     if (auth.isPending || !auth.user) {
@@ -105,6 +115,10 @@ export default function PropertyBookerCard({ property }: PropertyBookerCardProps
     }
     if (Number(guests) < 1 || !Number.isInteger(Number(guests))) {
       setBookingError("Enter at least one guest.");
+      return;
+    }
+    if (Number(guests) > property.max_guests) {
+      setBookingError(`This stay allows up to ${property.max_guests} guests.`);
       return;
     }
 
@@ -235,7 +249,7 @@ export default function PropertyBookerCard({ property }: PropertyBookerCardProps
             </label>
             <label className="flex max-w-xs flex-col gap-1 text-sm">
               Number of guests
-              <input className={fieldClassName} type="number" min={1} step={1} value={guests} onChange={(event) => setGuests(event.target.value)} required />
+              <input className={fieldClassName} type="number" min={1} max={property.max_guests} step={1} value={guests} onChange={(event) => setGuests(event.target.value)} required />
             </label>
             <div>
               <p className="mb-2 text-sm font-medium">Choose check-in and check-out</p>
@@ -262,6 +276,11 @@ export default function PropertyBookerCard({ property }: PropertyBookerCardProps
                 <li key={booking.booking_id} className="rounded-lg border border-zinc-200 p-3 text-sm dark:border-zinc-800">
                   <p className="font-medium">{booking.guest_name} · {booking.status}</p>
                   <p>{booking.check_in} to {booking.check_out} · {booking.guests} guests</p>
+                  <p>
+                    Total: {booking.total_price === null
+                      ? "Not available for this booking"
+                      : `${Number(booking.total_price).toFixed(2)} kr`}
+                  </p>
                   {booking.user_id === auth.user?.id ? (
                     editingBooking?.booking_id === booking.booking_id ? (
                       <form onSubmit={updateMyBooking} className="mt-3 flex flex-col gap-3">
@@ -275,12 +294,22 @@ export default function PropertyBookerCard({ property }: PropertyBookerCardProps
                         </label>
                         <label className="flex max-w-xs flex-col gap-1">
                           Number of guests
-                          <input name="guests" type="number" min={1} step={1} className={fieldClassName} defaultValue={booking.guests} required />
+                          <input name="guests" type="number" min={1} max={property.max_guests} step={1} className={fieldClassName} defaultValue={booking.guests} required />
                         </label>
                         <BookingPicker
                           initialDates={{ check_in: booking.check_in, check_out: booking.check_out }}
                           selectDates={setEditDates}
                         />
+                        <p>
+                          Current saved total: {booking.total_price === null
+                            ? "Total not available"
+                            : `${Number(booking.total_price).toFixed(2)} kr`}
+                        </p>
+                        {editDatesChanged && editNights > 0 ? (
+                          <p>
+                            New estimated total: {editEstimatedTotal.toFixed(2)} kr. This total applies when you save.
+                          </p>
+                        ) : null}
                         <div className="flex gap-3">
                           <button type="submit" disabled={pending} className="rounded-lg border px-3 py-1">Save</button>
                           <button type="button" onClick={() => setEditingBooking(null)} className="rounded-lg border px-3 py-1">Cancel</button>
