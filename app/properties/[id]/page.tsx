@@ -3,15 +3,25 @@ import T from "@/components/typography";
 import { getPropertyById } from "@/utils/propertyService";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import PropertyOwnerControls from "@/components/PropertyOwnerControls";
 
 export default async function PropertyPage({
   params,
 }: PageProps<"/properties/[id]">) {
   const { id } = await params;
-  const property = await getPropertyById(id);
-  if (!property) {
+  const result = await getPropertyById(id);
+  if ("notFound" in result) {
     notFound();
   }
+  if ("error" in result) {
+    return (
+      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-6 py-10">
+        <p role="alert" className="text-sm text-red-600 dark:text-red-400">{result.error}</p>
+        <Link href="/">Back to stays</Link>
+      </main>
+    );
+  }
+  const property = result.property;
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-6 py-10">
@@ -40,6 +50,7 @@ export default async function PropertyPage({
         </div>
       </dl>
       <PropertyBookerCard property={property}/>
+      <PropertyOwnerControls property={property} />
     </main>
   );
 }
