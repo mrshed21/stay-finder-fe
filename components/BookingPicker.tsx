@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { DayPicker } from "react-day-picker";
 import type { DateRange } from "react-day-picker";
 import { parseISO, format, startOfToday } from "date-fns";
@@ -24,6 +24,18 @@ export default function BookingPicker({
         }
       : undefined,
   );
+
+  useEffect(() => {
+    setRange(
+      initialDates
+        ? {
+            from: parseISO(initialDates.check_in),
+            to: parseISO(initialDates.check_out),
+          }
+        : undefined,
+    );
+  }, [initialDates?.check_in, initialDates?.check_out]);
+
   const bookedDates: BookingDates[] = [];
   const booked = useMemo(
     () =>
