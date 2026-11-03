@@ -46,6 +46,8 @@ export default function PropertyBookerCard({ property }: PropertyBookerCardProps
   const [bookingError, setBookingError] = useState<string>();
   const [editError, setEditError] = useState<string>();
   const [listError, setListError] = useState<string>();
+  const [statusError, setStatusError] = useState<string>();
+  const [statusMessage, setStatusMessage] = useState<string>();
   const [success, setSuccess] = useState<string>();
   const [pending, setPending] = useState(false);
   const [refreshBookings, setRefreshBookings] = useState(0);
@@ -69,6 +71,8 @@ export default function PropertyBookerCard({ property }: PropertyBookerCardProps
   const editEstimatedTotal = editNights > 0
     ? editNights * Number(property.price_per_night)
     : 0;
+  // VG4: only the property's owner sees Confirm and Reject. The API and database check this too.
+  const isOwner = auth.user?.id === property.user_id;
 
   useEffect(() => {
     if (auth.isPending || !auth.user) {
@@ -209,6 +213,35 @@ export default function PropertyBookerCard({ property }: PropertyBookerCardProps
     }
   }
 
+  // VG4: Confirm sets "confirmed", Reject sets "cancelled".
+  async function changeBookingStatus(booking: BookingResponse, status: "confirmed" | "cancelled") {
+    setStatusError(undefined);
+    setStatusMessage(undefined);
+    setPending(true);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/bookings/properties/${property.property_id}/${booking.booking_id}/status`,
+        {
+          method: "PATCH",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status }),
+        },
+      );
+      if (!response.ok) {
+        const body = await response.json().catch(() => null);
+        setStatusError(apiErrorMessage(body));
+        return;
+      }
+      setStatusMessage(status === "confirmed" ? "Booking confirmed." : "Booking rejected.");
+      setRefreshBookings((value) => value + 1);
+    } catch {
+      setStatusError("Could not connect to Stay Finder. Please try again.");
+    } finally {
+      setPending(false);
+    }
+  }
+
   async function deleteMyBooking(booking: BookingResponse) {
     if (!window.confirm("Delete this booking?")) return;
     setBookingError(undefined);
@@ -276,6 +309,8 @@ export default function PropertyBookerCard({ property }: PropertyBookerCardProps
           <div className="border-t border-line-soft pt-6">
             <h3 className="text-lg font-semibold">Bookings for this stay</h3>
             {listError ? <p role="alert" className="notice-error mt-3">{listError}</p> : null}
+            {statusError ? <p role="alert" className="notice-error mt-3">{statusError}</p> : null}
+            {statusMessage ? <p role="status" className="notice-success mt-3">{statusMessage}</p> : null}
             {!listError && bookings.length === 0 ? <p className="mt-2 text-sm text-muted">No bookings to show.</p> : null}
             <ul className="mt-3 flex flex-col gap-3">
               {bookings.map((booking) => (
@@ -287,7 +322,30 @@ export default function PropertyBookerCard({ property }: PropertyBookerCardProps
                       ? "Not available for this booking"
                       : `${Number(booking.total_price).toFixed(2)} kr`}
                   </p>
-                  {booking.user_id === auth.user?.id ? (
+                  {isOwner && booking.status === "pending" ? (
+                    <div className="mt-3 flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        disabled={pending}
+                        onClick={() => changeBookingStatus(booking, "confirmed")}
+                        aria-label={`Confirm booking for ${booking.guest_name}, ${booking.check_in} to ${booking.check_out}`}
+                        className="button-primary"
+                      >
+                        Confirm
+                      </button>
+                      <button
+                        type="button"
+                        disabled={pending}
+                        onClick={() => changeBookingStatus(booking, "cancelled")}
+                        aria-label={`Reject booking for ${booking.guest_name}, ${booking.check_in} to ${booking.check_out}`}
+                        className="button-danger"
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  ) : null}
+                  {/* A rejected (cancelled) booking is final, so its guest gets no Edit or Delete. */}
+                  {booking.user_id === auth.user?.id && booking.status !== "cancelled" ? (
                     editingBooking?.booking_id === booking.booking_id ? (
                       <form onSubmit={updateMyBooking} className="mt-3 flex flex-col gap-4 border-t border-line-soft pt-4">
                         <label className="field-label">
