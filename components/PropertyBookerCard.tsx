@@ -17,6 +17,9 @@ type BookingResponse = Omit<Booking, "user_id"> & { user_id?: string };
 
 const fieldClassName = "field text-sm";
 
+// VG2: the API answers 409 when another active booking already has these nights.
+const DATES_TAKEN_MESSAGE = "These dates are already booked. Please choose different dates.";
+
 function apiErrorMessage(body: unknown): string {
   if (typeof body === "object" && body !== null && "errors" in body) {
     const errors = (body as { errors?: unknown }).errors;
@@ -41,6 +44,7 @@ export default function PropertyBookerCard({ property }: PropertyBookerCardProps
   const [guests, setGuests] = useState("1");
   const [bookings, setBookings] = useState<BookingResponse[]>([]);
   const [bookingError, setBookingError] = useState<string>();
+  const [editError, setEditError] = useState<string>();
   const [listError, setListError] = useState<string>();
   const [success, setSuccess] = useState<string>();
   const [pending, setPending] = useState(false);
@@ -143,7 +147,9 @@ export default function PropertyBookerCard({ property }: PropertyBookerCardProps
         const body = await response.json().catch(() => null);
         setBookingError(response.status === 401
           ? "Sign in before booking this stay."
-          : apiErrorMessage(body));
+          : response.status === 409
+            ? DATES_TAKEN_MESSAGE
+            : apiErrorMessage(body));
         return;
       }
 
@@ -164,6 +170,7 @@ export default function PropertyBookerCard({ property }: PropertyBookerCardProps
     event.preventDefault();
     if (!editingBooking) return;
     setBookingError(undefined);
+    setEditError(undefined);
     const formData = new FormData(event.currentTarget);
     const nextDates = editDates ?? {
       check_in: editingBooking.check_in,
@@ -189,14 +196,14 @@ export default function PropertyBookerCard({ property }: PropertyBookerCardProps
       );
       if (!response.ok) {
         const body = await response.json().catch(() => null);
-        setBookingError(apiErrorMessage(body));
+        setEditError(response.status === 409 ? DATES_TAKEN_MESSAGE : apiErrorMessage(body));
         return;
       }
       setEditingBooking(null);
       setRefreshBookings((value) => value + 1);
       setSuccess("Your booking was updated.");
     } catch {
-      setBookingError("Could not connect to Stay Finder. Please try again.");
+      setEditError("Could not connect to Stay Finder. Please try again.");
     } finally {
       setPending(false);
     }
@@ -311,14 +318,16 @@ export default function PropertyBookerCard({ property }: PropertyBookerCardProps
                             </p>
                           ) : null}
                         </div>
+                        {/* Shown next to the edit form so a date conflict is easy to see. */}
+                        {editError ? <p role="alert" className="notice-error">{editError}</p> : null}
                         <div className="flex flex-wrap gap-3">
                           <button type="submit" disabled={pending} className="button-primary">Save</button>
-                          <button type="button" onClick={() => setEditingBooking(null)} className="button-secondary">Cancel</button>
+                          <button type="button" onClick={() => { setEditingBooking(null); setEditError(undefined); }} className="button-secondary">Cancel</button>
                         </div>
                       </form>
                     ) : (
                       <div className="mt-3 flex flex-wrap gap-3">
-                        <button type="button" onClick={() => { setEditingBooking(booking); setEditDates(undefined); }} className="button-secondary">Edit</button>
+                        <button type="button" onClick={() => { setEditingBooking(booking); setEditDates(undefined); setEditError(undefined); }} className="button-secondary">Edit</button>
                         <button type="button" disabled={pending} onClick={() => deleteMyBooking(booking)} className="button-danger">Delete</button>
                       </div>
                     )
