@@ -5,6 +5,8 @@ export type PropertiesFilter = {
   maxprice?: string;
   maxguests?: string;
   sort?: "asc" | "desc";
+  checkin?: string;
+  checkout?: string;
 };
 
 export type CreatePropertyState = {
@@ -44,9 +46,17 @@ export async function getProperties(
   if (filters.sort) {
     url.searchParams.set("sort", filters.sort);
   }
+  // VG7: only stays that are free on these dates.
+  if (filters.checkin && filters.checkout) {
+    url.searchParams.set("checkin", filters.checkin);
+    url.searchParams.set("checkout", filters.checkout);
+  }
 
   try {
     const response = await fetch(url);
+    if (response.status === 400) {
+      return { properties: [], error: "Some search filters are invalid. Check the dates and try again." };
+    }
     if (!response.ok) {
       return { properties: [], error: "Could not load stays. Please try again." };
     }
