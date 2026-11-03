@@ -39,5 +39,6 @@ npm run build
 - Create and manage the signed-in guest's bookings. The property owner can view bookings for their properties.
 - Show the saved booking total and a date-change estimate.
 - Show "These dates are already booked" when the API rejects overlapping dates with `409` (VG2), next to the booking or edit form.
+- Let the property owner confirm or reject pending bookings in the booking list on the stay page (VG4). Reject sets the status to `cancelled`, which frees the dates.
 
-The selected VG criteria are VG1, VG2, VG3, VG5, and VG6. VG4 and VG7 are not implemented. The API and Supabase database, rather than hidden frontend controls, enforce authorization and booking rules. The frontend does not check availability itself, because RLS only shows a guest their own bookings.
+The selected VG criteria are VG1, VG2, VG3, VG4, VG5, and VG6. VG7 is not implemented. The API and Supabase database, rather than hidden frontend controls, enforce authorization and booking rules. The frontend does not check availability itself, because RLS only shows a guest their own bookings.
