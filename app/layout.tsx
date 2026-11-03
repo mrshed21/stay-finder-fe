@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Link from "next/link";
 import "./globals.css";
 import Providers from "@/components/Providers";
-import AuthHeader from "@/components/AuthHeader";
+import NavBar from "@/components/NavBar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,23 +27,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="flex min-h-full flex-col font-sans">
         <Providers>
-          <header className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-black">
-            <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-6 py-4">
-              <Link href="/" className="text-xl font-bold">
-                Stay Finder
-              </Link>
-              <Link
-                href="/host/properties/new"
-                className="text-sm font-medium text-zinc-700 hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-white"
-              >
-                List a stay
-              </Link>
-              <AuthHeader/>
-            </div>
-          </header>
+          <NavBar />
           {children}
-          <footer className="border-t border-zinc-200 bg-white dark:border-zinc-800 dark:bg-black">
-            <div className="mx-auto w-full max-w-3xl px-6 py-6 text-sm text-zinc-600 dark:text-zinc-400">
+          <footer className="glass-nav border-t">
+            <div className="mx-auto w-full max-w-3xl px-4 py-6 text-sm text-muted sm:px-6">
               © {new Date().getFullYear()} Stay Finder
             </div>
           </footer>

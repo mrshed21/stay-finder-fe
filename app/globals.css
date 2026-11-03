@@ -1,26 +1,336 @@
 @import "tailwindcss";
 
+/* Dark Autumn Glass: one permanent dark theme. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+  --background: #1b1715;
+  --foreground: #fff1de;
+  --muted: #ceb6a2;
+  --glass: #382b26;
+  --border: #9b7e6b; /* input borders: at least 3:1 against the glass */
+  --border-soft: rgb(206 182 162 / 22%); /* calm card outlines */
+  --accent: #d77e4d;
+  --accent-hover: #e8955f;
+  --button-text: #251b18;
+  --olive: #9fae7b;
+  --error: #ffb5a8;
+  --success: #c4d6a2;
 }
 
+/* Makes the colors usable as Tailwind classes, e.g. text-muted, border-line. */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --color-muted: var(--muted);
+  --color-glass: var(--glass);
+  --color-line: var(--border);
+  --color-line-soft: var(--border-soft);
+  --color-accent: var(--accent);
+  --color-olive: var(--olive);
+  --color-error: var(--error);
+  --color-success: var(--success);
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Base styles live in a layer so Tailwind utility classes can override them. */
+@layer base {
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+
+  /* Autumn background: soft copper and olive glows on dark brown, CSS only. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: -10%;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(45% 40% at 12% 8%, rgb(215 126 77 / 20%), transparent 70%),
+      radial-gradient(40% 35% at 90% 22%, rgb(159 174 123 / 12%), transparent 70%),
+      radial-gradient(50% 45% at 75% 95%, rgb(170 86 48 / 16%), transparent 70%),
+      linear-gradient(160deg, #241c18 0%, #1b1715 50%, #161210 100%);
+    animation: autumn-drift 45s ease-in-out infinite alternate;
+  }
+
+  h1, h2, h3 {
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  a, button {
+    transition: color 150ms, background-color 150ms, border-color 150ms, box-shadow 150ms, transform 150ms;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--olive);
+    outline-offset: 3px;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  ::selection {
+    background: rgb(215 126 77 / 45%);
+    color: var(--foreground);
   }
 }
 
-body {
-  background: var(--background);
+/* Very slow drift of the background glows. */
+@keyframes autumn-drift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(3%, -2%, 0) scale(1.05); }
+}
+
+/* No movement for people who ask for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  body::before { animation: none; }
+  *, *::before, *::after {
+    transition-duration: 0ms !important;
+  }
+}
+
+/* Reusable visual classes. Tailwind utilities can still override them. */
+@layer components {
+  /* Glass surfaces: mostly solid so text stays easy to read. */
+  .glass {
+    background: rgb(56 43 38 / 88%);
+    border: 1px solid var(--border-soft);
+    border-radius: 1rem;
+    box-shadow:
+      inset 0 1px 0 rgb(255 241 222 / 6%),
+      0 18px 40px -18px rgb(0 0 0 / 70%);
+    backdrop-filter: blur(10px);
+  }
+  .glass-nav {
+    background: rgb(27 23 21 / 80%);
+    border-color: var(--border-soft);
+    backdrop-filter: blur(10px);
+  }
+  /* Darker box for content inside a glass card, e.g. one booking. */
+  .glass-inset {
+    background: rgb(27 23 21 / 50%);
+    border: 1px solid var(--border-soft);
+    border-radius: 0.75rem;
+  }
+
+  /* Form labels and inputs */
+  .field-label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--muted);
+  }
+  .field {
+    width: 100%;
+    min-height: 2.75rem;
+    border: 1px solid var(--border);
+    border-radius: 0.625rem;
+    background: rgb(27 23 21 / 85%);
+    color: var(--foreground);
+    font-weight: 400;
+    padding: 0.625rem 0.875rem;
+    transition: border-color 150ms;
+  }
+  .field::placeholder { color: rgb(206 182 162 / 75%); opacity: 1; }
+  .field:hover { border-color: #b8977f; }
+  .field:focus-visible { border-color: var(--olive); outline-offset: 1px; }
+  .field:user-invalid { border-color: var(--error); }
+  .field:disabled { opacity: 0.55; }
+  .field option { background: var(--glass); color: var(--foreground); }
+  textarea.field { min-height: 7rem; resize: vertical; line-height: 1.5; }
+
+  /* Buttons: primary = main action, secondary = other actions, danger = delete. */
+  .button-primary, .button-secondary, .button-danger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    border: 1px solid transparent;
+    border-radius: 0.625rem;
+    padding: 0.5rem 1.125rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+  .button-primary {
+    background: var(--accent);
+    color: var(--button-text);
+    box-shadow: 0 8px 20px -10px rgb(215 126 77 / 70%);
+  }
+  .button-primary:hover:not(:disabled) { background: var(--accent-hover); color: var(--button-text); }
+  .button-secondary {
+    background: rgb(255 241 222 / 5%);
+    border-color: var(--border);
+    color: var(--foreground);
+  }
+  .button-secondary:hover:not(:disabled) {
+    background: rgb(159 174 123 / 14%);
+    border-color: var(--olive);
+    color: var(--foreground);
+  }
+  .button-danger {
+    border-color: rgb(255 181 168 / 55%);
+    color: var(--error);
+  }
+  .button-danger:hover:not(:disabled) {
+    background: rgb(255 181 168 / 12%);
+    border-color: var(--error);
+    color: var(--error);
+  }
+  :is(.button-primary, .button-secondary, .button-danger):active:not(:disabled) {
+    transform: translateY(1px);
+  }
+  :is(.button-primary, .button-secondary, .button-danger):disabled { box-shadow: none; }
+
+  /* Navbar links. aria-current="page" marks the page you are on. */
+  .nav-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.5rem;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    padding: 0.375rem 0.875rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--muted);
+  }
+  .nav-link:hover { color: var(--foreground); background: rgb(255 241 222 / 6%); }
+  .nav-link[aria-current="page"] {
+    border-color: rgb(215 126 77 / 45%);
+    background: rgb(215 126 77 / 16%);
+    color: var(--foreground);
+  }
+  .button-secondary[aria-current="page"] { border-color: var(--accent); background: rgb(215 126 77 / 16%); }
+  .button-primary[aria-current="page"] { box-shadow: 0 0 0 2px var(--background), 0 0 0 4px rgb(215 126 77 / 60%); }
+
+  /* Round account button showing the first letter of the email */
+  .avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 2px solid rgb(255 241 222 / 25%);
+    border-radius: 999px;
+    background: var(--accent);
+    color: var(--button-text);
+    font-weight: 700;
+  }
+  .avatar:hover { background: var(--accent-hover); }
+  .avatar[aria-expanded="true"] { border-color: var(--foreground); }
+
+  /* Account dropdown: almost solid so the text is easy to read */
+  .menu-panel {
+    background: rgb(42 33 29 / 97%);
+    border: 1px solid var(--border-soft);
+    border-radius: 0.875rem;
+    box-shadow: 0 18px 40px -12px rgb(0 0 0 / 75%);
+  }
+  .menu-item {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    min-height: 2.5rem;
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--foreground);
+    text-align: left;
+  }
+  .menu-item:hover:not(:disabled) { background: rgb(159 174 123 / 14%); }
+
+  /* Underlined link inside normal text */
+  .text-link {
+    color: var(--foreground);
+    text-decoration: underline;
+    text-decoration-color: var(--accent);
+    text-underline-offset: 3px;
+  }
+  .text-link:hover { color: var(--accent-hover); }
+
+  /* Small olive label, e.g. "villa" or "confirmed" */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid rgb(159 174 123 / 40%);
+    border-radius: 999px;
+    background: rgb(159 174 123 / 12%);
+    color: var(--olive);
+    padding: 0.125rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: capitalize;
+  }
+
+  /* Messages after an action */
+  .notice-error, .notice-success {
+    border: 1px solid;
+    border-radius: 0.625rem;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+  }
+  .notice-error {
+    border-color: rgb(255 181 168 / 40%);
+    background: rgb(255 181 168 / 10%);
+    color: var(--error);
+  }
+  .notice-success {
+    border-color: rgb(196 214 162 / 40%);
+    background: rgb(196 214 162 / 10%);
+    color: var(--success);
+  }
+}
+
+/*
+  Calendar colors. react-day-picker loads its own CSS, so these rules stay
+  outside a layer and use two classes to win over the library defaults.
+*/
+.rdp-root.booking-calendar {
+  overflow-x: auto;
+  /* Room for the focus ring so overflow does not cut it off.
+     The negative margin keeps the calendar in the same place. */
+  padding: 4px;
+  margin: -4px;
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  --rdp-accent-color: var(--accent);
+  --rdp-accent-background-color: #5c4234;
+  --rdp-range_start-color: var(--button-text);
+  --rdp-range_end-color: var(--button-text);
+  --rdp-range_middle-color: var(--foreground);
+  --rdp-today-color: var(--olive);
+  --rdp-weekday-opacity: 1;
+}
+.booking-calendar .rdp-weekday { color: var(--muted); font-size: 0.75rem; font-weight: 600; }
+.booking-calendar .rdp-caption_label { font-weight: 600; }
+.booking-calendar .rdp-today:not(.rdp-outside) { font-weight: 700; }
+.booking-calendar .rdp-day_button:hover:not(:disabled),
+.booking-calendar .rdp-button_next:hover:not(:disabled),
+.booking-calendar .rdp-button_previous:hover:not(:disabled) {
+  background: rgb(159 174 123 / 18%);
+}
+.booking-calendar .rdp-range_start .rdp-day_button:hover,
+.booking-calendar .rdp-range_end .rdp-day_button:hover {
+  background: var(--accent-hover);
+}
+.booking-calendar .rdp-day_button:focus-visible,
+.booking-calendar .rdp-button_next:focus-visible,
+.booking-calendar .rdp-button_previous:focus-visible {
+  outline: 2px solid var(--olive);
+  outline-offset: 2px;
+}
+/* Smaller days on narrow phones so the calendar fits without scrolling. */
+@media (max-width: 400px) {
+  .rdp-root.booking-calendar { --rdp-day-width: 38px; --rdp-day-height: 38px; --rdp-day_button-width: 36px; --rdp-day_button-height: 36px; }
+}
+@media (max-width: 360px) {
+  .rdp-root.booking-calendar { --rdp-day-width: 34px; --rdp-day-height: 34px; --rdp-day_button-width: 32px; --rdp-day_button-height: 32px; }
 }

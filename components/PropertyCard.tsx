@@ -16,17 +16,20 @@ export default function PropertyCard({
     <Link
       href={`/properties/${property.property_id}`}
       className={cn(
-        "block rounded-xl border border-zinc-200 bg-white p-5 shadow-sm transition hover:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-600",
+        "glass flex h-full flex-col gap-1 p-5 hover:border-olive hover:bg-[#45342c]/95 motion-safe:hover:-translate-y-0.5",
         className,
       )}
     >
-      <T.Header size="md">{property.title}</T.Header>
-      <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+      <div className="flex items-start justify-between gap-3">
+        <T.Header size="md">{property.title}</T.Header>
+        <span className="badge mt-0.5 shrink-0">{property.kind}</span>
+      </div>
+      <p className="mb-5 text-sm text-muted">
         {property.location}
       </p>
-      <p className="mt-4 text-sm font-medium">
+      <p className="mt-auto border-t border-line-soft pt-4 text-lg font-semibold">
         {property.price_per_night} kr
-        <span className="font-normal text-zinc-500"> / night</span>
+        <span className="text-sm font-normal text-muted"> / night</span>
       </p>
     </Link>
   );

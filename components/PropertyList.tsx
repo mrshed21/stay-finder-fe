@@ -26,16 +26,16 @@ export default async function PropertyList({
   const result = await getProperties(propertiesFilter);
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-6">
         <T.Header size="lg">Places to stay</T.Header>
         <PropertyFilter filter={propertiesFilter} />
       </div>
       {result.error ? (
-        <p role="alert" className="text-sm text-red-600 dark:text-red-400">{result.error}</p>
+        <p role="alert" className="notice-error">{result.error}</p>
       ) : result.properties.length === 0 ? (
-        <p>No stays match your search yet.</p>
+        <p className="glass p-6 text-center text-muted">No stays match your search yet.</p>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="grid gap-4 sm:grid-cols-2">
           {result.properties.map((property) => (
             <PropertyCard key={property.property_id} property={property} />
           ))}
