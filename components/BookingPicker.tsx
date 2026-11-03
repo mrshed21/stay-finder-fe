@@ -60,6 +60,7 @@ export default function BookingPicker({
 
   return (
     <DayPicker
+      className="booking-calendar"
       mode="range"
       selected={range}
       onSelect={onSelect}

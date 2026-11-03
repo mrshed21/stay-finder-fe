@@ -51,8 +51,8 @@ export default function PropertyOwnerControls({
   }
 
   return (
-    <section className="flex flex-col gap-4 rounded-xl border border-zinc-200 p-5 dark:border-zinc-800">
-      <h2 className="font-semibold">Manage this stay</h2>
+    <section className="glass flex flex-col gap-5 p-5 sm:p-8">
+      <h2 className="text-xl font-semibold">Manage this stay</h2>
       {editing ? (
         <>
           <PropertyForm
@@ -64,17 +64,17 @@ export default function PropertyOwnerControls({
           <button
             type="button"
             onClick={() => setEditing(false)}
-            className="w-fit text-sm underline"
+            className="button-secondary w-full sm:w-fit"
           >
             Cancel
           </button>
         </>
       ) : (
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <button
             type="button"
             onClick={() => setEditing(true)}
-            className="rounded-lg border border-zinc-300 px-4 py-2 text-sm dark:border-zinc-700"
+            className="button-secondary"
           >
             Edit stay
           </button>
@@ -82,14 +82,14 @@ export default function PropertyOwnerControls({
             type="button"
             onClick={removeProperty}
             disabled={pending}
-            className="rounded-lg border border-red-300 px-4 py-2 text-sm text-red-700 disabled:opacity-60 dark:border-red-900 dark:text-red-400"
+            className="button-danger"
           >
             {pending ? "Deleting…" : "Delete stay"}
           </button>
         </div>
       )}
       {error ? (
-        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+        <p role="alert" className="notice-error">
           {error}
         </p>
       ) : null}

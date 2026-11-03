@@ -15,8 +15,7 @@ type PropertyBookerCardProps = {
 
 type BookingResponse = Omit<Booking, "user_id"> & { user_id?: string };
 
-const fieldClassName =
-  "w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-950";
+const fieldClassName = "field text-sm";
 
 function apiErrorMessage(body: unknown): string {
   if (typeof body === "object" && body !== null && "errors" in body) {
@@ -227,72 +226,72 @@ export default function PropertyBookerCard({ property }: PropertyBookerCardProps
   }
 
   return (
-    <section className="flex flex-col gap-5 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
-      <h2 className="text-lg font-semibold">Book this stay</h2>
+    <section className="glass flex flex-col gap-6 p-5 sm:p-8">
+      <h2 className="text-xl font-semibold">Book this stay</h2>
 
       {auth.isPending ? (
-        <p>Checking your sign-in…</p>
+        <p className="text-muted">Checking your sign-in…</p>
       ) : !auth.user ? (
         <p>
-          Please <Link className="underline" href="/auth/login">log in</Link> to book this stay.
+          Please <Link className="text-link" href="/auth/login">log in</Link> to book this stay.
         </p>
       ) : (
         <>
-          <form onSubmit={submitBooking} className="flex flex-col gap-4">
-            <label className="flex flex-col gap-1 text-sm">
+          <form onSubmit={submitBooking} className="flex flex-col gap-5">
+            <label className="field-label">
               Guest name
               <input className={fieldClassName} value={guestName} onChange={(event) => setGuestName(event.target.value)} required minLength={2} />
             </label>
-            <label className="flex flex-col gap-1 text-sm">
+            <label className="field-label">
               Guest email
               <input className={fieldClassName} type="email" value={guestEmail} onChange={(event) => setGuestEmail(event.target.value)} required />
             </label>
-            <label className="flex max-w-xs flex-col gap-1 text-sm">
+            <label className="field-label max-w-xs">
               Number of guests
               <input className={fieldClassName} type="number" min={1} max={property.max_guests} step={1} value={guests} onChange={(event) => setGuests(event.target.value)} required />
             </label>
             <div>
-              <p className="mb-2 text-sm font-medium">Choose check-in and check-out</p>
+              <p className="mb-2 text-sm font-medium text-muted">Choose check-in and check-out</p>
               <BookingPicker initialDates={bookingDates} selectDates={setBookingDates} />
             </div>
             {nights > 0 ? (
-              <p className="text-sm">
-                {nights} {nights === 1 ? "night" : "nights"} · Estimated total: {estimatedTotal.toFixed(2)} kr
+              <p className="rounded-lg border border-olive/40 bg-olive/10 px-4 py-3 text-sm">
+                {nights} {nights === 1 ? "night" : "nights"} · Estimated total: <span className="font-semibold">{estimatedTotal.toFixed(2)} kr</span>
               </p>
             ) : null}
-            {bookingError ? <p role="alert" className="text-sm text-red-600">{bookingError}</p> : null}
-            {success ? <p role="status" className="text-sm text-green-700">{success}</p> : null}
-            <button type="submit" disabled={pending} className="w-fit rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900">
+            {bookingError ? <p role="alert" className="notice-error">{bookingError}</p> : null}
+            {success ? <p role="status" className="notice-success">{success}</p> : null}
+            <button type="submit" disabled={pending} className="button-primary w-full sm:w-fit sm:px-6">
               {pending ? "Sending…" : "Request booking"}
             </button>
           </form>
 
-          <div className="border-t border-zinc-200 pt-4 dark:border-zinc-800">
-            <h3 className="font-semibold">Bookings for this stay</h3>
-            {listError ? <p role="alert" className="mt-2 text-sm text-red-600">{listError}</p> : null}
-            {!listError && bookings.length === 0 ? <p className="mt-2 text-sm text-zinc-600">No bookings to show.</p> : null}
+          <div className="border-t border-line-soft pt-6">
+            <h3 className="text-lg font-semibold">Bookings for this stay</h3>
+            {listError ? <p role="alert" className="notice-error mt-3">{listError}</p> : null}
+            {!listError && bookings.length === 0 ? <p className="mt-2 text-sm text-muted">No bookings to show.</p> : null}
             <ul className="mt-3 flex flex-col gap-3">
               {bookings.map((booking) => (
-                <li key={booking.booking_id} className="rounded-lg border border-zinc-200 p-3 text-sm dark:border-zinc-800">
-                  <p className="font-medium">{booking.guest_name} · {booking.status}</p>
-                  <p>{booking.check_in} to {booking.check_out} · {booking.guests} guests</p>
-                  <p>
+                <li key={booking.booking_id} className="glass-inset flex flex-col gap-1 p-4 text-sm">
+                  <p className="flex flex-wrap items-center gap-2 font-semibold">{booking.guest_name} <span className="badge">{booking.status}</span></p>
+                  <p className="text-muted">{booking.check_in} to {booking.check_out} · {booking.guests} guests</p>
+                  <p className="font-medium">
                     Total: {booking.total_price === null
                       ? "Not available for this booking"
                       : `${Number(booking.total_price).toFixed(2)} kr`}
                   </p>
                   {booking.user_id === auth.user?.id ? (
                     editingBooking?.booking_id === booking.booking_id ? (
-                      <form onSubmit={updateMyBooking} className="mt-3 flex flex-col gap-3">
-                        <label className="flex flex-col gap-1">
+                      <form onSubmit={updateMyBooking} className="mt-3 flex flex-col gap-4 border-t border-line-soft pt-4">
+                        <label className="field-label">
                           Guest name
                           <input name="guest_name" className={fieldClassName} defaultValue={booking.guest_name} required minLength={2} />
                         </label>
-                        <label className="flex flex-col gap-1">
+                        <label className="field-label">
                           Guest email
                           <input name="guest_email" type="email" className={fieldClassName} defaultValue={booking.guest_email} required />
                         </label>
-                        <label className="flex max-w-xs flex-col gap-1">
+                        <label className="field-label max-w-xs">
                           Number of guests
                           <input name="guests" type="number" min={1} max={property.max_guests} step={1} className={fieldClassName} defaultValue={booking.guests} required />
                         </label>
@@ -300,25 +299,27 @@ export default function PropertyBookerCard({ property }: PropertyBookerCardProps
                           initialDates={{ check_in: booking.check_in, check_out: booking.check_out }}
                           selectDates={setEditDates}
                         />
-                        <p>
-                          Current saved total: {booking.total_price === null
-                            ? "Total not available"
-                            : `${Number(booking.total_price).toFixed(2)} kr`}
-                        </p>
-                        {editDatesChanged && editNights > 0 ? (
-                          <p>
-                            New estimated total: {editEstimatedTotal.toFixed(2)} kr. This total applies when you save.
+                        <div className="flex flex-col gap-1 rounded-lg border border-olive/40 bg-olive/10 px-4 py-3">
+                          <p className="text-muted">
+                            Current saved total: {booking.total_price === null
+                              ? "Total not available"
+                              : `${Number(booking.total_price).toFixed(2)} kr`}
                           </p>
-                        ) : null}
-                        <div className="flex gap-3">
-                          <button type="submit" disabled={pending} className="rounded-lg border px-3 py-1">Save</button>
-                          <button type="button" onClick={() => setEditingBooking(null)} className="rounded-lg border px-3 py-1">Cancel</button>
+                          {editDatesChanged && editNights > 0 ? (
+                            <p className="font-medium">
+                              New estimated total: {editEstimatedTotal.toFixed(2)} kr. This total applies when you save.
+                            </p>
+                          ) : null}
+                        </div>
+                        <div className="flex flex-wrap gap-3">
+                          <button type="submit" disabled={pending} className="button-primary">Save</button>
+                          <button type="button" onClick={() => setEditingBooking(null)} className="button-secondary">Cancel</button>
                         </div>
                       </form>
                     ) : (
-                      <div className="mt-2 flex gap-3">
-                        <button type="button" onClick={() => { setEditingBooking(booking); setEditDates(undefined); }} className="underline">Edit</button>
-                        <button type="button" disabled={pending} onClick={() => deleteMyBooking(booking)} className="underline">Delete</button>
+                      <div className="mt-3 flex flex-wrap gap-3">
+                        <button type="button" onClick={() => { setEditingBooking(booking); setEditDates(undefined); }} className="button-secondary">Edit</button>
+                        <button type="button" disabled={pending} onClick={() => deleteMyBooking(booking)} className="button-danger">Delete</button>
                       </div>
                     )
                   ) : null}

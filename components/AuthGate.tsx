@@ -7,16 +7,16 @@ export default function AuthGate({ children }: PropsWithChildren) {
     const auth = useAuth()
     if(auth.isPending) {
         return (
-            <div>
+            <div className="text-muted">
                 Loading...
             </div>
         )
     }
     if(!auth.user) {
         return (
-            <div className="p-4 rounded-md bg-slate-200">
-                You have to be logged in to do this
-                <Link href={"/auth/login"}>
+            <div className="glass flex flex-col items-start gap-4 p-6 sm:p-8">
+                <p>You have to be logged in to do this</p>
+                <Link className="button-primary" href={"/auth/login"}>
                     Go to Login
                 </Link>
             </div>

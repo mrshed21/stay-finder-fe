@@ -9,11 +9,11 @@ type HeaderProps = ComponentPropsWithoutRef<"p"> & {
 const T = {
   Header: ({ children, size, className, ...props }: HeaderProps) => {
     const classes = cn(
-      "font-bold",
+      "font-bold tracking-tight text-foreground",
       {
         "text-lg": size === "sm",
         "text-xl": size === "md",
-        "text-2xl": size === "lg",
+        "text-3xl sm:text-4xl": size === "lg",
       },
       className,
     );

@@ -18,10 +18,12 @@ export default function NewPropertyPage() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-6 py-10">
-      <T.Header size="lg">List a stay</T.Header>
+    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-4 py-10 sm:px-6 sm:py-14">
+      <T.Header size="lg">Add stay</T.Header>
       <AuthGate>
-        <PropertyForm action={onCreate} />
+        <div className="glass p-5 sm:p-8">
+          <PropertyForm action={onCreate} />
+        </div>
       </AuthGate>
     </main>
   );

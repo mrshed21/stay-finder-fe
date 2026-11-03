@@ -15,38 +15,38 @@ export default async function PropertyPage({
   }
   if ("error" in result) {
     return (
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-6 py-10">
-        <p role="alert" className="text-sm text-red-600 dark:text-red-400">{result.error}</p>
-        <Link href="/">Back to stays</Link>
+      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-start gap-6 px-4 py-10 sm:px-6 sm:py-14">
+        <p role="alert" className="notice-error w-full">{result.error}</p>
+        <Link href="/" className="button-secondary">Back to stays</Link>
       </main>
     );
   }
   const property = result.property;
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-6 py-10">
+    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 px-4 py-10 sm:px-6 sm:py-14">
       <Link
         href="/"
-        className="text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+        className="w-fit text-sm font-medium text-muted hover:text-foreground"
       >
-        All stays
+        <span aria-hidden="true">← </span>All stays
       </Link>
-      <div className="flex flex-col gap-2">
-        <p className="text-sm capitalize text-zinc-500">{property.kind}</p>
+      <div className="flex flex-col items-start gap-3">
+        <p className="badge">{property.kind}</p>
         <T.Header size="lg">{property.title}</T.Header>
-        <p className="text-zinc-600 dark:text-zinc-400">{property.location}</p>
+        <p className="text-muted">{property.location}</p>
       </div>
       <p className="max-w-prose leading-relaxed">{property.description}</p>
-      <dl className="grid grid-cols-2 gap-4 rounded-xl border border-zinc-200 p-5 text-sm dark:border-zinc-800">
-        <div>
-          <dt className="text-zinc-500">Price per night</dt>
-          <dd className="mt-1 text-lg font-semibold">
+      <dl className="glass grid grid-cols-2 divide-x divide-line-soft text-sm">
+        <div className="p-5">
+          <dt className="text-muted">Price per night</dt>
+          <dd className="mt-1 text-2xl font-semibold">
             {property.price_per_night} kr
           </dd>
         </div>
-        <div>
-          <dt className="text-zinc-500">Guests</dt>
-          <dd className="mt-1 text-lg font-semibold">{property.max_guests}</dd>
+        <div className="p-5">
+          <dt className="text-muted">Guests</dt>
+          <dd className="mt-1 text-2xl font-semibold">{property.max_guests}</dd>
         </div>
       </dl>
       <PropertyBookerCard property={property}/>

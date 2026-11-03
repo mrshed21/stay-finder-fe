@@ -49,15 +49,19 @@ export default function AuthForm({ mode = "login" }: { mode?: "login" | "registe
   }
 
   return (
-    <form onSubmit={onSubmit}>
-      <T.Header>{mode === "register" ? "Register" : "Log in"}</T.Header>
-      <input name="email" type="email" placeholder="Enter email" required />
-      <input name="password" type="password" placeholder="Enter Password" minLength={6} required />
-      <button type="submit" disabled={pending}>{mode === "register" ? "Register" : "Log in"}</button>
+    <form onSubmit={onSubmit} className="glass flex flex-col gap-5 p-6 sm:p-8">
+      <T.Header size="md" className="text-2xl">{mode === "register" ? "Register" : "Log in"}</T.Header>
+      <label className="field-label">Email
+        <input className="field" name="email" type="email" placeholder="Enter email" required />
+      </label>
+      <label className="field-label">Password
+        <input className="field" name="password" type="password" placeholder="Enter password" minLength={6} required />
+      </label>
+      <button className="button-primary mt-1 w-full" type="submit" disabled={pending}>{mode === "register" ? "Register" : "Log in"}</button>
       {error && (
-        <p className="text-red-500">{error}</p>
+        <p role="alert" className="notice-error">{error}</p>
       )}
-      {success && <p>{success}</p>}
+      {success && <p role="status" className="notice-success">{success}</p>}
     </form>
   );
 }

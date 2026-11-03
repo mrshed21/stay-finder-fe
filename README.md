@@ -28,7 +28,7 @@ Open <http://localhost:3001>. Authenticated requests include the backend session
 
 ```sh
 npx tsc --noEmit
-npx next build --webpack
+npm run build
 ```
 
 ## Features
