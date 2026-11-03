@@ -22,6 +22,8 @@ export default async function PropertyList({
     sort: firstValue(params.sort) === "asc" || firstValue(params.sort) === "desc"
       ? firstValue(params.sort) as "asc" | "desc"
       : undefined,
+    checkin: firstValue(params.checkin) || "",
+    checkout: firstValue(params.checkout) || "",
   };
   const result = await getProperties(propertiesFilter);
   return (
